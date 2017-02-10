@@ -14,18 +14,20 @@ import br.com.etyllica.i18n.loader.INIReader;
 import br.com.etyllica.i18n.loader.TextReader;
 import br.com.etyllica.loader.LoaderImpl;
 import br.com.etyllica.util.StringUtils;
+import br.com.etyllica.util.io.IOHelper;
 
 public class TextLoader extends LoaderImpl {
 
 	private static TextLoader instance = null;
 
 	private Map<String, TextReader> loaders = new HashMap<String, TextReader>();
-	
+
 	private List<Dictionary> index = new ArrayList<Dictionary>();
 	private Map<String, Dictionary> dictionaries = new HashMap<String, Dictionary>();
 
 	private final static String INI = "ini";
 	private final static String TXT = "txt";
+	private final static String CONF = "conf";
 
 	private TextLoader() {
 		super();
@@ -34,6 +36,7 @@ public class TextLoader extends LoaderImpl {
 
 		loaders.put(INI, new INIReader());
 		loaders.put(TXT, new INIReader());
+		loaders.put(CONF, new INIReader());
 	}
 
 	public static TextLoader getInstance() {
@@ -49,34 +52,32 @@ public class TextLoader extends LoaderImpl {
 	}
 
 	public Dictionary loadDictionary(String path) {
-		if (!dictionaries.containsKey(path)) {
-			String fullPath = folder + path;
+		String fullPath = fullPath() + path;
 
-			if (dictionaries.containsKey(fullPath)) {
-				return dictionaries.get(fullPath);
-			} else {
+		if (dictionaries.containsKey(fullPath)) {
+			return dictionaries.get(fullPath);
+		} else {
 
-				URL dir = null;
+			URL dir = null;
 
-				try {
-					dir = new URL(url, fullPath);
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			try {
+				dir = new URL(url, fullPath);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
 
-				String ext = StringUtils.fileExtension(path);
-				TextReader reader = loaders.get(ext);
+			String ext = StringUtils.fileExtension(path);
+			TextReader reader = loaders.get(ext);
 
-				Dictionary dictionary;
-				try {
-					dictionary = reader.loadDictionary(dir);
-					dictionaries.put(fullPath, dictionary);
-					index.add(dictionary);
-					return dictionary;
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			Dictionary dictionary;
+			try {
+				dictionary = reader.loadDictionary(dir);
+				dictionaries.put(fullPath, dictionary);
+				index.add(dictionary);
+				return dictionary;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 
